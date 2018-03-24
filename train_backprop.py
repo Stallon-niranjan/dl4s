@@ -1,5 +1,8 @@
 import numpy as np
 from mnist import load_mnist
+from optimizer import SGD
+from optimizer import AdaGrad
+from optimizer import Adam
 from two_layer_net_backprop import TwoLayerNet
 
 
@@ -11,10 +14,12 @@ test_acc_list = []
 iters_num = 10000
 batch_size = 100
 train_size = x_train.shape[0]
-learning_rate = 0.1
 iter_per_epoch = max(train_size / batch_size, 1)
 
 net = TwoLayerNet(input_size=784, hidden_size=50, output_size=10)
+# optim = SGD(net.params, lr=0.1, momentum=0.9)
+# optim = AdaGrad(net.params)
+optim = Adam(net.params)
 
 for i in range(iters_num):
     batch_mask = np.random.choice(train_size, batch_size)
@@ -22,9 +27,7 @@ for i in range(iters_num):
     t_batch = t_train[batch_mask]
 
     grad = net.gradient(x_batch, t_batch)
-
-    for key in ('W1', 'b1', 'W2', 'b2'):
-        net.params[key] -= learning_rate * grad[key]
+    net.params = optim.update(net.params, grad)
 
     loss = net.loss(x_batch, t_batch)
     train_loss_list.append(loss)
